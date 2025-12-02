@@ -12,35 +12,17 @@ RUN npm ci --only=production
 # Etapa de producción
 FROM node:18-alpine
 
-# Instalar chromium y dependencias para puppeteer
-RUN apk add --no-cache \
-    chromium \
-    nss \
-    freetype \
-    harfbuzz \
-    ca-certificates \
-    ttf-freefont
-
 # Crear usuario no-root
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
 WORKDIR /app
 
-# Crear directorio para WhatsApp con permisos correctos
-RUN mkdir -p /app/.wwebjs_auth && \
-    chown -R nodejs:nodejs /app/.wwebjs_auth && \
-    chmod -R 755 /app/.wwebjs_auth
-
 # Copiar node_modules desde builder
 COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 
 # Copiar código de la aplicación
 COPY --chown=nodejs:nodejs . .
-
-# Variables de entorno para puppeteer
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 # Cambiar a usuario no-root
 USER nodejs

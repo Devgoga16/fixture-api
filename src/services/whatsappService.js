@@ -1,8 +1,6 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcodeTerminal = require('qrcode-terminal');
 const QRCode = require('qrcode');
-const fs = require('fs');
-const path = require('path');
 
 class WhatsAppService {
   constructor() {
@@ -15,32 +13,13 @@ class WhatsAppService {
    * Inicializa el cliente de WhatsApp
    */
   initialize() {
-    // Crear directorio de autenticación si no existe
-    const authPath = path.join(process.cwd(), '.wwebjs_auth');
-    try {
-      if (!fs.existsSync(authPath)) {
-        fs.mkdirSync(authPath, { recursive: true, mode: 0o755 });
-        console.log('✅ Directorio de autenticación creado:', authPath);
-      }
-    } catch (error) {
-      console.error('⚠️ Error creando directorio de autenticación:', error.message);
-    }
-
     this.client = new Client({
       authStrategy: new LocalAuth({
-        dataPath: authPath
+        dataPath: '.wwebjs_auth'
       }),
       puppeteer: {
         headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-first-run',
-          '--no-zygote',
-          '--disable-gpu'
-        ]
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
       }
     });
 

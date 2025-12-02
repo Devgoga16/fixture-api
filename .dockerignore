@@ -12,5 +12,3 @@ coverage
 dist
 build
 .editorconfig
-.wwebjs_auth
-.wwebjs_cache
