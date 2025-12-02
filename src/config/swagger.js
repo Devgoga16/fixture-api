@@ -19,6 +19,10 @@ const options = {
         url: 'http://localhost:3000',
         description: 'Servidor de desarrollo',
       },
+      {
+        url: 'https://fixture-api-6ds7q1-0d111f-31-97-133-67.traefik.me',
+        description: 'Servidor de prod',
+      },
     ],
     tags: [
       {
