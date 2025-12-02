@@ -34,6 +34,10 @@ const options = {
         description: 'Gestión de jugadores de equipos',
       },
       {
+        name: 'DNI',
+        description: 'Consulta de información por DNI',
+      },
+      {
         name: 'Health',
         description: 'Estado del servidor',
       },

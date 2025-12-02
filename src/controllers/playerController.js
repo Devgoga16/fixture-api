@@ -1,5 +1,6 @@
 const Player = require('../models/Player');
 const Team = require('../models/Team');
+const DniService = require('../services/dniService');
 
 class PlayerController {
   /**
@@ -165,6 +166,37 @@ class PlayerController {
       }
       
       res.status(500).json({ error: 'Error al actualizar jugador' });
+    }
+  }
+
+  /**
+   * GET /api/dni/:numero
+   * Consultar información de una persona por DNI
+   */
+  static async consultarDni(req, res) {
+    try {
+      const { numero } = req.params;
+
+      // Validar formato de DNI (8 dígitos)
+      if (!/^\d{8}$/.test(numero)) {
+        return res.status(400).json({
+          error: 'DNI inválido. Debe contener 8 dígitos'
+        });
+      }
+
+      const result = await DniService.consultarDni(numero);
+
+      if (!result.success) {
+        return res.status(result.statusCode || 400).json({
+          error: result.error,
+          message: result.message
+        });
+      }
+
+      res.json(result.data);
+    } catch (error) {
+      console.error('Error consultando DNI:', error);
+      res.status(500).json({ error: 'Error al consultar DNI' });
     }
   }
 }
