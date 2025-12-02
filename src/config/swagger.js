@@ -30,6 +30,10 @@ const options = {
         description: 'Operaciones relacionadas con torneos y brackets',
       },
       {
+        name: 'Players',
+        description: 'Gestión de jugadores de equipos',
+      },
+      {
         name: 'Health',
         description: 'Estado del servidor',
       },
@@ -252,6 +256,36 @@ const options = {
             message: {
               type: 'string',
               description: 'Detalles adicionales del error (solo en desarrollo)',
+            },
+          },
+        },
+        Player: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'ID único del jugador',
+              example: '507f1f77bcf86cd799439020',
+            },
+            fullName: {
+              type: 'string',
+              description: 'Nombre completo del jugador',
+              example: 'Juan Pérez García',
+            },
+            dni: {
+              type: 'string',
+              description: 'DNI del jugador',
+              example: '12345678A',
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación',
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización',
             },
           },
         },

@@ -4,6 +4,7 @@ const swaggerUi = require('swagger-ui-express');
 const connectDB = require('./config/database');
 const swaggerSpec = require('./config/swagger');
 const tournamentRoutes = require('./routes/tournaments');
+const playerRoutes = require('./routes/players');
 
 // Cargar variables de entorno
 require('dotenv').config();
@@ -33,6 +34,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
 
 // Routes
 app.use('/api/tournaments', tournamentRoutes);
+app.use('/api/teams', playerRoutes);
 
 /**
  * @swagger
@@ -102,6 +104,12 @@ app.get('/', (req, res) => {
         updateMatch: 'PUT /api/tournaments/:id/matches/:matchId',
         reset: 'POST /api/tournaments/:id/reset',
         delete: 'DELETE /api/tournaments/:id'
+      },
+      players: {
+        add: 'POST /api/teams/:teamId/players',
+        list: 'GET /api/teams/:teamId/players',
+        update: 'PUT /api/teams/:teamId/players/:playerId',
+        delete: 'DELETE /api/teams/:teamId/players/:playerId'
       }
     }
   });
