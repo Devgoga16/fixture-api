@@ -3,9 +3,14 @@ const cors = require('cors');
 const swaggerUi = require('swagger-ui-express');
 const connectDB = require('./config/database');
 const swaggerSpec = require('./config/swagger');
+const whatsappService = require('./services/whatsappService');
 const tournamentRoutes = require('./routes/tournaments');
 const playerRoutes = require('./routes/players');
 const dniRoutes = require('./routes/dni');
+const superAdminRoutes = require('./routes/superadmins');
+const authRoutes = require('./routes/auth');
+const delegadoRoutes = require('./routes/delegado');
+const matchesRoutes = require('./routes/matches');
 
 // Cargar variables de entorno
 require('dotenv').config();
@@ -15,6 +20,9 @@ const app = express();
 
 // Conectar a MongoDB
 connectDB();
+
+// Inicializar WhatsApp Web
+whatsappService.initialize();
 
 // Middleware
 app.use(cors());
@@ -37,6 +45,10 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
 app.use('/api/tournaments', tournamentRoutes);
 app.use('/api/teams', playerRoutes);
 app.use('/api/dni', dniRoutes);
+app.use('/api/superadmins', superAdminRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/delegado', delegadoRoutes);
+app.use('/api/matches', matchesRoutes);
 
 /**
  * @swagger
@@ -99,6 +111,24 @@ app.get('/', (req, res) => {
     documentation: '/api-docs',
     endpoints: {
       health: 'GET /health',
+      auth: {
+        superadmin: {
+          requestOTP: 'POST /api/auth/request-otp',
+          verifyOTP: 'POST /api/auth/verify-otp'
+        },
+        delegado: {
+          requestOTP: 'POST /api/auth/delegado/request-otp',
+          verifyOTP: 'POST /api/auth/delegado/verify-otp'
+        },
+        whatsappStatus: 'GET /api/auth/whatsapp-status'
+      },
+      delegado: {
+        getMyTeams: 'GET /api/delegado/teams?phone=xxx',
+        getTeamDetails: 'GET /api/delegado/teams/:teamId?phone=xxx'
+      },
+      matches: {
+        notify: 'POST /api/matches/:matchId/notify'
+      },
       tournaments: {
         create: 'POST /api/tournaments',
         list: 'GET /api/tournaments',
@@ -115,6 +145,13 @@ app.get('/', (req, res) => {
       },
       dni: {
         consult: 'GET /api/dni/:numero'
+      },
+      superadmins: {
+        create: 'POST /api/superadmins',
+        list: 'GET /api/superadmins',
+        get: 'GET /api/superadmins/:id',
+        update: 'PUT /api/superadmins/:id',
+        delete: 'DELETE /api/superadmins/:id'
       }
     }
   });

@@ -32,7 +32,9 @@ class TournamentController {
         teams.map((team, index) => ({
           tournamentId: tournament._id,
           name: team.name,
-          position: index
+          position: index,
+          delegadoNombre: team.delegadoNombre || null,
+          delegadoTelefono: team.delegadoTelefono || null
         }))
       );
 
@@ -43,7 +45,9 @@ class TournamentController {
       const teamsFormatted = teamDocs.map(team => ({
         id: team._id,
         name: team.name,
-        position: team.position
+        position: team.position,
+        delegadoNombre: team.delegadoNombre,
+        delegadoTelefono: team.delegadoTelefono
       }));
 
       res.status(201).json({
@@ -79,7 +83,9 @@ class TournamentController {
       const teamsFormatted = teams.map(team => ({
         id: team._id,
         name: team.name,
-        position: team.position
+        position: team.position,
+        delegadoNombre: team.delegadoNombre,
+        delegadoTelefono: team.delegadoTelefono
       }));
 
       res.json({
@@ -208,7 +214,9 @@ class TournamentController {
       const teamsFormatted = teams.map(team => ({
         id: team._id,
         name: team.name,
-        position: team.position
+        position: team.position,
+        delegadoNombre: team.delegadoNombre,
+        delegadoTelefono: team.delegadoTelefono
       }));
 
       res.json({

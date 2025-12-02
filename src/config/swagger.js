@@ -26,12 +26,28 @@ const options = {
     ],
     tags: [
       {
+        name: 'Auth',
+        description: 'Autenticación con OTP por WhatsApp',
+      },
+      {
         name: 'Tournaments',
         description: 'Operaciones relacionadas con torneos y brackets',
       },
       {
+        name: 'Matches',
+        description: 'Notificaciones y operaciones de partidos',
+      },
+      {
         name: 'Players',
         description: 'Gestión de jugadores de equipos',
+      },
+      {
+        name: 'Delegados',
+        description: 'Operaciones para delegados de equipos',
+      },
+      {
+        name: 'SuperAdmins',
+        description: 'Gestión de superadministradores',
       },
       {
         name: 'DNI',
@@ -113,6 +129,18 @@ const options = {
               description: 'Posición original en el torneo',
               example: 0,
             },
+            delegadoNombre: {
+              type: 'string',
+              description: 'Nombre del delegado del equipo',
+              example: 'Juan Pérez',
+              nullable: true,
+            },
+            delegadoTelefono: {
+              type: 'string',
+              description: 'Número de teléfono del delegado',
+              example: '987654321',
+              nullable: true,
+            },
           },
         },
         TeamInput: {
@@ -123,6 +151,16 @@ const options = {
               type: 'string',
               description: 'Nombre del equipo',
               example: 'Barcelona',
+            },
+            delegadoNombre: {
+              type: 'string',
+              description: 'Nombre del delegado del equipo',
+              example: 'María García',
+            },
+            delegadoTelefono: {
+              type: 'string',
+              description: 'Número de teléfono del delegado',
+              example: '912345678',
             },
           },
         },
@@ -223,10 +261,26 @@ const options = {
               minItems: 2,
               items: { $ref: '#/components/schemas/TeamInput' },
               example: [
-                { name: 'Real Madrid' },
-                { name: 'Barcelona' },
-                { name: 'Bayern Munich' },
-                { name: 'PSG' },
+                { 
+                  name: 'Real Madrid',
+                  delegadoNombre: 'Juan Pérez',
+                  delegadoTelefono: '987654321'
+                },
+                { 
+                  name: 'Barcelona',
+                  delegadoNombre: 'María García',
+                  delegadoTelefono: '912345678'
+                },
+                { 
+                  name: 'Bayern Munich',
+                  delegadoNombre: 'Carlos López',
+                  delegadoTelefono: '998877665'
+                },
+                { 
+                  name: 'PSG',
+                  delegadoNombre: 'Ana Torres',
+                  delegadoTelefono: '955443322'
+                },
               ],
             },
           },
@@ -280,6 +334,36 @@ const options = {
               type: 'string',
               description: 'DNI del jugador',
               example: '12345678A',
+            },
+            createdAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación',
+            },
+            updatedAt: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización',
+            },
+          },
+        },
+        SuperAdmin: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'ID único del superadmin',
+              example: '507f1f77bcf86cd799439030',
+            },
+            name: {
+              type: 'string',
+              description: 'Nombre del superadmin',
+              example: 'Carlos Rodríguez',
+            },
+            phone: {
+              type: 'string',
+              description: 'Número de teléfono',
+              example: '999888777',
             },
             createdAt: {
               type: 'string',

@@ -15,6 +15,24 @@ const teamSchema = new mongoose.Schema({
   position: {
     type: Number,
     required: true
+  },
+  delegadoNombre: {
+    type: String,
+    trim: true,
+    default: null
+  },
+  delegadoTelefono: {
+    type: String,
+    trim: true,
+    default: null
+  },
+  otpCode: {
+    type: String,
+    default: null
+  },
+  otpExpiry: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true
