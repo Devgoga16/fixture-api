@@ -24,6 +24,11 @@ COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 # Copiar código de la aplicación
 COPY --chown=nodejs:nodejs . .
 
+# Crear directorio para WhatsApp Web.js con permisos correctos
+RUN mkdir -p /app/.wwebjs_auth && \
+    chown -R nodejs:nodejs /app/.wwebjs_auth && \
+    chmod -R 755 /app/.wwebjs_auth
+
 # Cambiar a usuario no-root
 USER nodejs
 
