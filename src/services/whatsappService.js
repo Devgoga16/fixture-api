@@ -38,7 +38,12 @@ class WhatsAppService {
           '--disable-accelerated-2d-canvas',
           '--no-first-run',
           '--no-zygote',
-          '--disable-gpu'
+          '--disable-gpu',
+          '--disable-crash-reporter',
+          '--disable-breakpad',
+          '--disable-extensions',
+          '--disable-background-networking',
+          '--disable-sync'
         ],
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined
       }

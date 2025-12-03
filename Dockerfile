@@ -1,54 +1,51 @@
-# Etapa de construcción
-FROM node:18-slim AS builder
+# Usar Node.js 18 como base
+FROM node:18
 
+# Instalar dependencias necesarias para Puppeteer y Chromium
+RUN apt-get update && apt-get install -y \
+    wget \
+    ca-certificates \
+    fonts-liberation \
+    libappindicator3-1 \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libcups2 \
+    libdbus-1-3 \
+    libgdk-pixbuf2.0-0 \
+    libnspr4 \
+    libnss3 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    xdg-utils \
+    libgbm1 \
+    libxshmfence1 \
+    chromium \
+    --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
+# Variables de entorno para Puppeteer
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+
+# Crear directorio de la aplicación
 WORKDIR /app
 
 # Copiar archivos de dependencias
 COPY package*.json ./
 
-# Instalar dependencias
+# Instalar dependencias de producción
 RUN npm ci --only=production
 
-# Etapa de producción
-FROM node:18-slim
+# Copiar el código de la aplicación
+COPY . .
 
-# Instalar dependencias necesarias para Puppeteer/Chromium
-RUN apt-get update && apt-get install -y \
-    chromium \
-    chromium-sandbox \
-    fonts-ipafont-gothic \
-    fonts-wqy-zenhei \
-    fonts-thai-tlwg \
-    fonts-kacst \
-    fonts-freefont-ttf \
-    libxss1 \
-    --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/*
+# Crear directorio para la sesión de WhatsApp
+RUN mkdir -p .wwebjs_auth && chmod 777 .wwebjs_auth
 
-# Configurar Puppeteer para usar el Chromium instalado del sistema
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-
-# Crear usuario no-root
-RUN groupadd -r nodejs && useradd -r -g nodejs nodejs
-
-WORKDIR /app
-
-# Copiar node_modules desde builder
-COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
-
-# Copiar código de la aplicación
-COPY --chown=nodejs:nodejs . .
-
-# Crear directorio para WhatsApp Web.js con permisos correctos
-RUN mkdir -p /app/.wwebjs_auth && \
-    chown -R nodejs:nodejs /app/.wwebjs_auth && \
-    chmod -R 755 /app/.wwebjs_auth
-
-# Cambiar a usuario no-root
-USER nodejs
-
-# Exponer puerto
+# Exponer el puerto
 EXPOSE 3000
 
 # Variables de entorno por defecto
