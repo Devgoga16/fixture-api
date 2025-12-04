@@ -42,6 +42,15 @@ const matchSchema = new mongoose.Schema({
   completed: {
     type: Boolean,
     default: false
+  },
+  status: {
+    type: String,
+    enum: ['created', 'scheduled', 'in_progress', 'finished'],
+    default: 'created'
+  },
+  scheduledTime: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true

@@ -35,7 +35,9 @@ class BracketService {
         score1: null,
         score2: null,
         winnerId: null,
-        completed: false
+        completed: false,
+        status: 'created',
+        scheduledTime: null
       });
     }
 
@@ -52,7 +54,9 @@ class BracketService {
         score1: null,
         score2: null,
         winnerId: null,
-        completed: false
+        completed: false,
+        status: 'created',
+        scheduledTime: null
       };
 
       if (pos < preliminaryMatchesCount) {
@@ -97,7 +101,9 @@ class BracketService {
           score1: null,
           score2: null,
           winnerId: null,
-          completed: false
+          completed: false,
+          status: 'created',
+          scheduledTime: null
         });
       }
     }
@@ -129,7 +135,9 @@ class BracketService {
           score1: null,
           score2: null,
           winnerId: null,
-          completed: false
+          completed: false,
+          status: 'created',
+          scheduledTime: null
         };
 
         // Solo la primera ronda tiene equipos asignados
@@ -219,7 +227,9 @@ class BracketService {
         id: match.winnerId._id || match.winnerId,
         name: match.winnerId.name || null
       } : null,
-      completed: match.completed
+      completed: match.completed,
+      status: match.status || 'created',
+      scheduledTime: match.scheduledTime || null
     };
   }
 

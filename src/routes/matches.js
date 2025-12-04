@@ -1,6 +1,173 @@
 const express = require('express');
 const router = express.Router();
 const MatchNotificationController = require('../controllers/matchNotificationController');
+const MatchController = require('../controllers/matchController');
+
+/**
+ * @swagger
+ * /api/matches/{matchId}:
+ *   get:
+ *     summary: Obtener detalles de un partido
+ *     tags: [Matches]
+ *     description: Obtiene información completa de un partido específico
+ *     parameters:
+ *       - in: path
+ *         name: matchId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del partido
+ *         example: 507f1f77bcf86cd799439013
+ *     responses:
+ *       200:
+ *         description: Detalles del partido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 match:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     tournament:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                         name:
+ *                           type: string
+ *                     round:
+ *                       type: integer
+ *                     position:
+ *                       type: integer
+ *                     team1:
+ *                       type: object
+ *                       nullable: true
+ *                     team2:
+ *                       type: object
+ *                       nullable: true
+ *                     score1:
+ *                       type: integer
+ *                       nullable: true
+ *                     score2:
+ *                       type: integer
+ *                       nullable: true
+ *                     winner:
+ *                       type: object
+ *                       nullable: true
+ *                     status:
+ *                       type: string
+ *                       enum: [created, scheduled, in_progress, finished]
+ *                       example: created
+ *                     scheduledTime:
+ *                       type: string
+ *                       format: date-time
+ *                       nullable: true
+ *                     completed:
+ *                       type: boolean
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *       404:
+ *         description: Partido no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/:matchId', MatchController.getMatch);
+
+/**
+ * @swagger
+ * /api/matches/{matchId}/status:
+ *   put:
+ *     summary: Actualizar estado y hora programada de un partido
+ *     tags: [Matches]
+ *     description: Actualiza el estado del partido (creado, programado, iniciado, terminado) y opcionalmente la hora programada
+ *     parameters:
+ *       - in: path
+ *         name: matchId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del partido
+ *         example: 507f1f77bcf86cd799439013
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [created, scheduled, in_progress, finished]
+ *                 description: |
+ *                   Estado del partido:
+ *                   - **created**: Partido creado (por defecto)
+ *                   - **scheduled**: Partido programado (requiere scheduledTime)
+ *                   - **in_progress**: Partido en curso
+ *                   - **finished**: Partido finalizado
+ *                 example: scheduled
+ *               scheduledTime:
+ *                 type: string
+ *                 format: date-time
+ *                 description: Hora programada para el partido (requerido si status es 'scheduled')
+ *                 example: '2025-12-03T15:30:00.000Z'
+ *     responses:
+ *       200:
+ *         description: Estado actualizado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 match:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     tournament:
+ *                       type: string
+ *                       example: Copa Mundial 2025
+ *                     round:
+ *                       type: integer
+ *                     position:
+ *                       type: integer
+ *                     team1:
+ *                       type: string
+ *                       example: Real Madrid
+ *                     team2:
+ *                       type: string
+ *                       example: Barcelona
+ *                     status:
+ *                       type: string
+ *                       example: scheduled
+ *                     scheduledTime:
+ *                       type: string
+ *                       format: date-time
+ *                     completed:
+ *                       type: boolean
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *       400:
+ *         description: Estado inválido o datos faltantes
+ *       404:
+ *         description: Partido no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.put('/:matchId/status', MatchController.updateMatchStatus);
 
 /**
  * @swagger
