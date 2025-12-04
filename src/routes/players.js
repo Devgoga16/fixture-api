@@ -153,6 +153,84 @@ router.put('/:teamId/players/:playerId', PlayerController.updatePlayer);
 
 /**
  * @swagger
+ * /api/teams/{teamId}/delegado:
+ *   put:
+ *     summary: Actualizar información del delegado del equipo
+ *     tags: [Players]
+ *     description: Actualiza el nombre y/o número de teléfono del delegado de un equipo
+ *     parameters:
+ *       - in: path
+ *         name: teamId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del equipo
+ *         example: 507f1f77bcf86cd799439012
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               delegadoNombre:
+ *                 type: string
+ *                 description: Nuevo nombre del delegado
+ *                 example: María García López
+ *               delegadoTelefono:
+ *                 type: string
+ *                 description: Nuevo número de teléfono del delegado
+ *                 example: '987654321'
+ *     responses:
+ *       200:
+ *         description: Información del delegado actualizada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Información del delegado actualizada
+ *                 team:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     name:
+ *                       type: string
+ *                     delegado:
+ *                       type: object
+ *                       properties:
+ *                         nombre:
+ *                           type: string
+ *                         telefono:
+ *                           type: string
+ *                     tournament:
+ *                       type: object
+ *                       nullable: true
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                         name:
+ *                           type: string
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *       400:
+ *         description: Debe proporcionar al menos un campo para actualizar
+ *       404:
+ *         description: Equipo no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.put('/:teamId/delegado', PlayerController.updateDelegado);
+
+/**
+ * @swagger
  * /api/teams/{teamId}/players/{playerId}:
  *   delete:
  *     summary: Eliminar un jugador

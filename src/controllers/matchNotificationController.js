@@ -143,6 +143,15 @@ class MatchNotificationController {
 
     // Mensaje para equipo 1
     if (match.team1Id.delegadoTelefono) {
+      let scheduledTimeText = '';
+      if (match.scheduledTime) {
+        const utcDate = new Date(match.scheduledTime);
+        const peruDate = new Date(utcDate.getTime() - (0 * 60 * 60 * 1000)); // UTC-5
+        const hours = peruDate.getUTCHours().toString().padStart(2, '0');
+        const minutes = peruDate.getUTCMinutes().toString().padStart(2, '0');
+        scheduledTimeText = `\n⏰ *Hora programada:* ${hours}:${minutes}\n`;
+      }
+
       messages.push({
         teamName: match.team1Id.name,
         delegadoName: match.team1Id.delegadoNombre,
@@ -152,7 +161,7 @@ class MatchNotificationController {
                 `📢 *${match.team1Id.name}* es el próximo en jugar.\n\n` +
                 `*Enfrentamiento:*\n` +
                 `${match.team1Id.name} vs ${match.team2Id.name}\n` +
-                `${roundName}\n\n` +
+                `${roundName}${scheduledTimeText}\n` +
                 `Por favor, acércate a la mesa de control para:\n` +
                 `✅ Realizar la gestión necesaria\n` +
                 `✅ Validar jugadores\n` +
@@ -163,6 +172,15 @@ class MatchNotificationController {
 
     // Mensaje para equipo 2
     if (match.team2Id.delegadoTelefono) {
+      let scheduledTimeText = '';
+      if (match.scheduledTime) {
+        const utcDate = new Date(match.scheduledTime);
+        const peruDate = new Date(utcDate.getTime() - (0 * 60 * 60 * 1000)); // UTC+5
+        const hours = peruDate.getUTCHours().toString().padStart(2, '0');
+        const minutes = peruDate.getUTCMinutes().toString().padStart(2, '0');
+        scheduledTimeText = `\n⏰ *Hora programada:* ${hours}:${minutes}\n`;
+      }
+
       messages.push({
         teamName: match.team2Id.name,
         delegadoName: match.team2Id.delegadoNombre,
@@ -172,7 +190,7 @@ class MatchNotificationController {
                 `📢 *${match.team2Id.name}* es el próximo en jugar.\n\n` +
                 `*Enfrentamiento:*\n` +
                 `${match.team1Id.name} vs ${match.team2Id.name}\n` +
-                `${roundName}\n\n` +
+                `${roundName}${scheduledTimeText}\n` +
                 `Por favor, acércate a la mesa de control para:\n` +
                 `✅ Realizar la gestión necesaria\n` +
                 `✅ Validar jugadores\n` +
@@ -193,6 +211,7 @@ class MatchNotificationController {
 
     // Mensaje para equipo 1
     if (match.team1Id.delegadoTelefono) {
+
       messages.push({
         teamName: match.team1Id.name,
         delegadoName: match.team1Id.delegadoNombre,
@@ -202,7 +221,7 @@ class MatchNotificationController {
                 `🚨 *¡EL PARTIDO COMIENZA EN 5 MINUTOS!*\n\n` +
                 `*Enfrentamiento:*\n` +
                 `${match.team1Id.name} vs ${match.team2Id.name}\n` +
-                `${roundName}\n\n` +
+                `${roundName}\n` +
                 `Por favor, dirígete a la cancha con tu equipo.\n\n` +
                 `¡Es hora de darlo todo! 💪⚽`
       });
@@ -210,6 +229,7 @@ class MatchNotificationController {
 
     // Mensaje para equipo 2
     if (match.team2Id.delegadoTelefono) {
+
       messages.push({
         teamName: match.team2Id.name,
         delegadoName: match.team2Id.delegadoNombre,
@@ -219,7 +239,7 @@ class MatchNotificationController {
                 `🚨 *¡EL PARTIDO COMIENZA EN 5 MINUTOS!*\n\n` +
                 `*Enfrentamiento:*\n` +
                 `${match.team1Id.name} vs ${match.team2Id.name}\n` +
-                `${roundName}\n\n` +
+                `${roundName}\n` +
                 `Por favor, dirígete a la cancha con tu equipo.\n\n` +
                 `¡Es hora de darlo todo! 💪⚽`
       });

@@ -85,6 +85,154 @@ router.get('/:matchId', MatchController.getMatch);
 
 /**
  * @swagger
+ * /api/matches/{matchId}/full:
+ *   get:
+ *     summary: Obtener información completa del partido con jugadores
+ *     tags: [Matches]
+ *     description: Obtiene todos los detalles del partido incluyendo la lista completa de jugadores de ambos equipos
+ *     parameters:
+ *       - in: path
+ *         name: matchId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del partido
+ *         example: 507f1f77bcf86cd799439013
+ *     responses:
+ *       200:
+ *         description: Información completa del partido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 match:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     tournament:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                         name:
+ *                           type: string
+ *                         status:
+ *                           type: string
+ *                         totalTeams:
+ *                           type: integer
+ *                     round:
+ *                       type: integer
+ *                     roundName:
+ *                       type: string
+ *                       example: Octavos de Final
+ *                     position:
+ *                       type: integer
+ *                     team1:
+ *                       type: object
+ *                       nullable: true
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                         name:
+ *                           type: string
+ *                           example: Real Madrid
+ *                         position:
+ *                           type: integer
+ *                         delegado:
+ *                           type: object
+ *                           properties:
+ *                             nombre:
+ *                               type: string
+ *                             telefono:
+ *                               type: string
+ *                         players:
+ *                           type: array
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               id:
+ *                                 type: string
+ *                               fullName:
+ *                                 type: string
+ *                               dni:
+ *                                 type: string
+ *                               createdAt:
+ *                                 type: string
+ *                                 format: date-time
+ *                         playersCount:
+ *                           type: integer
+ *                     team2:
+ *                       type: object
+ *                       nullable: true
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                         name:
+ *                           type: string
+ *                           example: Barcelona
+ *                         position:
+ *                           type: integer
+ *                         delegado:
+ *                           type: object
+ *                           properties:
+ *                             nombre:
+ *                               type: string
+ *                             telefono:
+ *                               type: string
+ *                         players:
+ *                           type: array
+ *                           items:
+ *                             type: object
+ *                             properties:
+ *                               id:
+ *                                 type: string
+ *                               fullName:
+ *                                 type: string
+ *                               dni:
+ *                                 type: string
+ *                               createdAt:
+ *                                 type: string
+ *                                 format: date-time
+ *                         playersCount:
+ *                           type: integer
+ *                     score1:
+ *                       type: integer
+ *                       nullable: true
+ *                     score2:
+ *                       type: integer
+ *                       nullable: true
+ *                     winner:
+ *                       type: object
+ *                       nullable: true
+ *                     status:
+ *                       type: string
+ *                       enum: [created, scheduled, in_progress, finished]
+ *                     scheduledTime:
+ *                       type: string
+ *                       format: date-time
+ *                       nullable: true
+ *                     completed:
+ *                       type: boolean
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *       404:
+ *         description: Partido no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/:matchId/full', MatchController.getMatchFull);
+
+/**
+ * @swagger
  * /api/matches/{matchId}/status:
  *   put:
  *     summary: Actualizar estado y hora programada de un partido
@@ -168,6 +316,97 @@ router.get('/:matchId', MatchController.getMatch);
  *         description: Error interno del servidor
  */
 router.put('/:matchId/status', MatchController.updateMatchStatus);
+
+/**
+ * @swagger
+ * /api/matches/{matchId}/score:
+ *   put:
+ *     summary: Actualizar marcador del partido sin finalizarlo
+ *     tags: [Matches]
+ *     description: Actualiza el marcador (score1 y score2) del partido sin marcarlo como completado. Útil para actualizar marcadores en tiempo real durante el partido.
+ *     parameters:
+ *       - in: path
+ *         name: matchId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del partido
+ *         example: 507f1f77bcf86cd799439013
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - score1
+ *               - score2
+ *             properties:
+ *               score1:
+ *                 type: integer
+ *                 minimum: 0
+ *                 description: Marcador del equipo 1
+ *                 example: 2
+ *               score2:
+ *                 type: integer
+ *                 minimum: 0
+ *                 description: Marcador del equipo 2
+ *                 example: 1
+ *     responses:
+ *       200:
+ *         description: Marcador actualizado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Marcador actualizado
+ *                 match:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     tournament:
+ *                       type: string
+ *                       example: Copa Mundial 2025
+ *                     round:
+ *                       type: integer
+ *                     position:
+ *                       type: integer
+ *                     team1:
+ *                       type: string
+ *                       example: Real Madrid
+ *                     team2:
+ *                       type: string
+ *                       example: Barcelona
+ *                     score1:
+ *                       type: integer
+ *                       example: 2
+ *                     score2:
+ *                       type: integer
+ *                       example: 1
+ *                     status:
+ *                       type: string
+ *                       example: in_progress
+ *                     completed:
+ *                       type: boolean
+ *                       example: false
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *       400:
+ *         description: Datos inválidos o partido sin equipos asignados
+ *       404:
+ *         description: Partido no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.put('/:matchId/score', MatchController.updateScore);
 
 /**
  * @swagger

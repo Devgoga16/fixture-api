@@ -76,8 +76,8 @@ class PlayerController {
     try {
       const { teamId } = req.params;
 
-      // Verificar que el equipo existe
-      const team = await Team.findById(teamId);
+      // Verificar que el equipo existe y traer toda su información
+      const team = await Team.findById(teamId).populate('tournamentId', 'name status');
       if (!team) {
         return res.status(404).json({ error: 'Equipo no encontrado' });
       }
@@ -92,8 +92,22 @@ class PlayerController {
       }));
 
       res.json({
-        teamId: teamId,
-        teamName: team.name,
+        team: {
+          id: team._id,
+          name: team.name,
+          position: team.position,
+          delegado: {
+            nombre: team.delegadoNombre,
+            telefono: team.delegadoTelefono
+          },
+          tournament: team.tournamentId ? {
+            id: team.tournamentId._id,
+            name: team.tournamentId.name,
+            status: team.tournamentId.status
+          } : null,
+          createdAt: team.createdAt,
+          updatedAt: team.updatedAt
+        },
         players: playersFormatted,
         totalPlayers: playersFormatted.length
       });
@@ -166,6 +180,54 @@ class PlayerController {
       }
       
       res.status(500).json({ error: 'Error al actualizar jugador' });
+    }
+  }
+
+  /**
+   * PUT /api/teams/:teamId/delegado
+   * Actualizar información del delegado del equipo
+   */
+  static async updateDelegado(req, res) {
+    try {
+      const { teamId } = req.params;
+      const { delegadoNombre, delegadoTelefono } = req.body;
+
+      if (!delegadoNombre && !delegadoTelefono) {
+        return res.status(400).json({ 
+          error: 'Debe proporcionar al menos un campo para actualizar (delegadoNombre o delegadoTelefono)' 
+        });
+      }
+
+      const team = await Team.findById(teamId).populate('tournamentId', 'name');
+      if (!team) {
+        return res.status(404).json({ error: 'Equipo no encontrado' });
+      }
+
+      if (delegadoNombre !== undefined) team.delegadoNombre = delegadoNombre;
+      if (delegadoTelefono !== undefined) team.delegadoTelefono = delegadoTelefono;
+
+      await team.save();
+
+      res.json({
+        success: true,
+        message: 'Información del delegado actualizada',
+        team: {
+          id: team._id,
+          name: team.name,
+          delegado: {
+            nombre: team.delegadoNombre,
+            telefono: team.delegadoTelefono
+          },
+          tournament: team.tournamentId ? {
+            id: team.tournamentId._id,
+            name: team.tournamentId.name
+          } : null,
+          updatedAt: team.updatedAt
+        }
+      });
+    } catch (error) {
+      console.error('Error updating delegado:', error);
+      res.status(500).json({ error: 'Error al actualizar información del delegado' });
     }
   }
 
