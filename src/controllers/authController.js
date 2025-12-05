@@ -336,6 +336,89 @@ class AuthController {
       res.status(500).json({ error: 'Error al verificar código OTP' });
     }
   }
+
+  /**
+   * POST /api/auth/send-welcome-message
+   * Envía un mensaje de bienvenida a los delegados
+   */
+  static async sendWelcomeMessage(req, res) {
+    try {
+      const { phone } = req.body;
+
+      // Validaciones
+      if (!phone) {
+        return res.status(400).json({
+          error: 'Se requiere el número de teléfono'
+        });
+      }
+
+      // Verificar que WhatsApp esté conectado
+      if (!whatsappService.isClientReady()) {
+        return res.status(503).json({
+          error: 'Servicio de WhatsApp no disponible',
+          message: 'El administrador debe escanear el código QR primero'
+        });
+      }
+
+      // Buscar delegado por teléfono
+      const team = await Team.findOne({ delegadoTelefono: phone })
+        .populate('tournamentId', 'name');
+
+      if (!team) {
+        return res.status(404).json({
+          error: 'Delegado no encontrado con ese número de teléfono'
+        });
+      }
+
+      // Crear mensaje de bienvenida
+      const welcomeMessage = `🎉 *¡Bienvenido al Torneo UNIDOS EN CRISTO!*\n\n` +
+        `Hola *${team.delegadoNombre || 'Delegado'}*,\n\n` +
+        `Te damos la bienvenida al sistema de gestión de torneos. Como delegado del equipo *${team.name}* en el torneo *${team.tournamentId.name}*, ahora tienes acceso a:\n\n` +
+        `🌐 *Link Oficial del Torneo*\n` +
+        `https://torneo-iacymcomas.unify-tec.com/\n\n` +
+        `👀 *Acceso Público:* Cualquier persona puede hacer seguimiento general del torneo\n` +
+        `🔐 *Acceso Delegado:* Solo tú como delegado tienes acceso completo a:\n\n` +
+        `👥 *1. Gestión de Equipos*\n` +
+        `   • Ver tu equipo y todos sus integrantes\n` +
+        `   • Consultar información de jugadores\n\n` +
+        `⚽ *2. Seguimiento de Partidos*\n` +
+        `   • Ver todos tus partidos programados\n` +
+        `   • Consultar partidos jugados con resultados\n` +
+        `   • Ver detalles completos de cada partido:\n` +
+        `     - Goles anotados por equipo\n` +
+        `     - Tarjetas amarillas\n` +
+        `     - Marcadores y resultados\n` +
+        `     - Jugadores de ambos equipos\n` +
+        `     - Horarios programados\n\n` +
+        `📱 *Acceso al Dashboard*\n` +
+        `Ingresa con tu número de teléfono y el código OTP que recibirás por WhatsApp.\n\n` +
+        `🔔 *Notificaciones*\n` +
+        `Recibirás alertas automáticas sobre:\n` +
+        `   • Próximos partidos\n` +
+        `   • Partidos por comenzar\n` +
+        `   • Resultados y clasificaciones\n\n` +
+        `¡Mucha suerte en el torneo! 🏆\n\n` +
+        `_Si tienes alguna duda, contacta al administrador del torneo._`;
+
+      // Enviar mensaje con prefijo 51 si no lo tiene
+      const phoneWithCountryCode = phone.startsWith('51') ? phone : `51${phone}`;
+      await whatsappService.sendMessage(phoneWithCountryCode, welcomeMessage);
+
+      res.json({
+        success: true,
+        message: 'Mensaje de bienvenida enviado exitosamente',
+        sentTo: {
+          phone: phone,
+          name: team.delegadoNombre,
+          team: team.name,
+          tournament: team.tournamentId.name
+        }
+      });
+    } catch (error) {
+      console.error('Error sending welcome message:', error);
+      res.status(500).json({ error: 'Error al enviar mensaje de bienvenida' });
+    }
+  }
 }
 
 module.exports = AuthController;

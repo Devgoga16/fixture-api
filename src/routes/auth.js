@@ -294,4 +294,60 @@ router.post('/delegado/request-otp', AuthController.requestOTPDelegado);
  */
 router.post('/delegado/verify-otp', AuthController.verifyOTPDelegado);
 
+/**
+ * @swagger
+ * /api/auth/send-welcome-message:
+ *   post:
+ *     summary: Enviar mensaje de bienvenida al delegado
+ *     tags: [Auth]
+ *     description: Envía un mensaje de bienvenida por WhatsApp explicando las funcionalidades del dashboard
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - phone
+ *             properties:
+ *               phone:
+ *                 type: string
+ *                 description: Número de teléfono del delegado (formato internacional sin +)
+ *                 example: '51999888777'
+ *     responses:
+ *       200:
+ *         description: Mensaje enviado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Mensaje de bienvenida enviado exitosamente
+ *                 sentTo:
+ *                   type: object
+ *                   properties:
+ *                     phone:
+ *                       type: string
+ *                     name:
+ *                       type: string
+ *                     team:
+ *                       type: string
+ *                     tournament:
+ *                       type: string
+ *       400:
+ *         description: Datos inválidos
+ *       404:
+ *         description: Delegado no encontrado
+ *       503:
+ *         description: Servicio de WhatsApp no disponible
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post('/send-welcome-message', AuthController.sendWelcomeMessage);
+
 module.exports = router;
