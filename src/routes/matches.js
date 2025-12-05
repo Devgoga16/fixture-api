@@ -5,6 +5,89 @@ const MatchController = require('../controllers/matchController');
 
 /**
  * @swagger
+ * /api/matches/team/{teamId}:
+ *   get:
+ *     summary: Obtener todos los partidos de un equipo
+ *     tags: [Matches]
+ *     description: Obtiene todos los partidos (pasados, presentes y futuros) en los que participa un equipo específico
+ *     parameters:
+ *       - in: path
+ *         name: teamId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del equipo
+ *         example: 507f1f77bcf86cd799439013
+ *     responses:
+ *       200:
+ *         description: Lista de partidos del equipo
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 teamId:
+ *                   type: string
+ *                   example: 507f1f77bcf86cd799439013
+ *                 totalMatches:
+ *                   type: integer
+ *                   example: 5
+ *                 matches:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       tournament:
+ *                         type: object
+ *                       round:
+ *                         type: integer
+ *                       roundName:
+ *                         type: string
+ *                       team1:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                           name:
+ *                             type: string
+ *                           isMyTeam:
+ *                             type: boolean
+ *                       team2:
+ *                         type: object
+ *                       score1:
+ *                         type: integer
+ *                       score2:
+ *                         type: integer
+ *                       winner:
+ *                         type: object
+ *                         nullable: true
+ *                       goals:
+ *                         type: array
+ *                       yellowCards:
+ *                         type: array
+ *                       status:
+ *                         type: string
+ *                       scheduledTime:
+ *                         type: string
+ *                         format: date-time
+ *                       completed:
+ *                         type: boolean
+ *                       result:
+ *                         type: string
+ *                         enum: [won, lost, draw, null]
+ *                         nullable: true
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/team/:teamId', MatchController.getTeamMatches);
+
+/**
+ * @swagger
  * /api/matches/{matchId}:
  *   get:
  *     summary: Obtener detalles de un partido
@@ -507,5 +590,397 @@ router.put('/:matchId/score', MatchController.updateScore);
  *         description: Error interno del servidor
  */
 router.post('/:matchId/notify', MatchNotificationController.sendMatchNotification);
+
+/**
+ * @swagger
+ * /api/matches/{matchId}/goals:
+ *   post:
+ *     summary: Registrar un gol en el partido
+ *     tags: [Matches]
+ *     description: Registra un gol anotado por un jugador durante el partido
+ *     parameters:
+ *       - in: path
+ *         name: matchId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del partido
+ *         example: 507f1f77bcf86cd799439013
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - playerId
+ *               - teamId
+ *             properties:
+ *               playerId:
+ *                 type: string
+ *                 description: ID del jugador que anotó
+ *                 example: 507f1f77bcf86cd799439014
+ *               teamId:
+ *                 type: string
+ *                 description: ID del equipo del jugador
+ *                 example: 507f1f77bcf86cd799439015
+ *     responses:
+ *       200:
+ *         description: Gol registrado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Gol registrado exitosamente
+ *                 goal:
+ *                   type: object
+ *                   properties:
+ *                     playerId:
+ *                       type: object
+ *                     teamId:
+ *                       type: object
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                 totalGoalsInMatch:
+ *                   type: integer
+ *                   example: 3
+ *       400:
+ *         description: Datos inválidos o equipo no pertenece al partido
+ *       404:
+ *         description: Partido o jugador no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post('/:matchId/goals', MatchController.addGoal);
+
+/**
+ * @swagger
+ * /api/matches/{matchId}/yellow-cards:
+ *   post:
+ *     summary: Registrar una tarjeta amarilla en el partido
+ *     tags: [Matches]
+ *     description: Registra una tarjeta amarilla mostrada a un jugador durante el partido
+ *     parameters:
+ *       - in: path
+ *         name: matchId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del partido
+ *         example: 507f1f77bcf86cd799439013
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - playerId
+ *               - teamId
+ *             properties:
+ *               playerId:
+ *                 type: string
+ *                 description: ID del jugador que recibió la tarjeta
+ *                 example: 507f1f77bcf86cd799439014
+ *               teamId:
+ *                 type: string
+ *                 description: ID del equipo del jugador
+ *                 example: 507f1f77bcf86cd799439015
+ *     responses:
+ *       200:
+ *         description: Tarjeta amarilla registrada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Tarjeta amarilla registrada exitosamente
+ *                 yellowCard:
+ *                   type: object
+ *                   properties:
+ *                     playerId:
+ *                       type: object
+ *                     teamId:
+ *                       type: object
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                 totalYellowCardsInMatch:
+ *                   type: integer
+ *                   example: 2
+ *       400:
+ *         description: Datos inválidos o equipo no pertenece al partido
+ *       404:
+ *         description: Partido o jugador no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post('/:matchId/yellow-cards', MatchController.addYellowCard);
+
+/**
+ * @swagger
+ * /api/matches/{matchId}/sets:
+ *   post:
+ *     summary: Registrar un set en el partido de voleibol
+ *     tags: [Matches]
+ *     description: Registra el resultado de un set para partidos de voleibol (sport = 2). Actualiza automáticamente el marcador de sets ganados.
+ *     parameters:
+ *       - in: path
+ *         name: matchId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del partido
+ *         example: 507f1f77bcf86cd799439013
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - set
+ *               - score1
+ *               - score2
+ *             properties:
+ *               set:
+ *                 type: integer
+ *                 description: Número del set (1, 2, 3, etc.)
+ *                 example: 1
+ *               score1:
+ *                 type: integer
+ *                 description: Puntaje del equipo 1 en el set
+ *                 example: 25
+ *               score2:
+ *                 type: integer
+ *                 description: Puntaje del equipo 2 en el set
+ *                 example: 23
+ *               status:
+ *                 type: string
+ *                 enum: [in_progress, finished]
+ *                 description: Estado del set (opcional, por defecto "in_progress")
+ *                 example: finished
+ *     responses:
+ *       200:
+ *         description: Set registrado o actualizado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Set registrado exitosamente
+ *                 set:
+ *                   type: object
+ *                 totalSets:
+ *                   type: integer
+ *                   example: 3
+ *                 setsScore:
+ *                   type: object
+ *                   properties:
+ *                     team1:
+ *                       type: integer
+ *                       example: 2
+ *                     team2:
+ *                       type: integer
+ *                       example: 1
+ *                 allSets:
+ *                   type: array
+ *       400:
+ *         description: Datos inválidos, set ya existe, o partido no es de voleibol
+ *       404:
+ *         description: Partido no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.post('/:matchId/sets', MatchController.addSet);
+
+/**
+ * @swagger
+ * /api/matches/{matchId}/sets/{setNumber}:
+ *   put:
+ *     summary: Actualizar el resultado de un set
+ *     tags: [Matches]
+ *     description: Actualiza el puntaje de un set específico en un partido de voleibol
+ *     parameters:
+ *       - in: path
+ *         name: matchId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del partido
+ *         example: 507f1f77bcf86cd799439013
+ *       - in: path
+ *         name: setNumber
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Número del set a actualizar
+ *         example: 1
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - score1
+ *               - score2
+ *             properties:
+ *               score1:
+ *                 type: integer
+ *                 description: Nuevo puntaje del equipo 1
+ *                 example: 26
+ *               score2:
+ *                 type: integer
+ *                 description: Nuevo puntaje del equipo 2
+ *                 example: 24
+ *               status:
+ *                 type: string
+ *                 enum: [in_progress, finished]
+ *                 description: Estado del set (opcional)
+ *                 example: finished
+ *     responses:
+ *       200:
+ *         description: Set actualizado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Set actualizado exitosamente
+ *                 set:
+ *                   type: object
+ *                 setsScore:
+ *                   type: object
+ *                 allSets:
+ *                   type: array
+ *       400:
+ *         description: Datos inválidos o partido no es de voleibol
+ *       404:
+ *         description: Partido o set no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.put('/:matchId/sets/:setNumber', MatchController.updateSet);
+
+/**
+ * @swagger
+ * /api/matches/{matchId}/details/{teamId}:
+ *   get:
+ *     summary: Obtener detalles completos del partido desde la perspectiva de un equipo
+ *     tags: [Matches]
+ *     description: Obtiene toda la información del partido organizada desde el punto de vista de un equipo específico, incluyendo jugadores, goles y tarjetas de ambos equipos
+ *     parameters:
+ *       - in: path
+ *         name: matchId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del partido
+ *         example: 507f1f77bcf86cd799439013
+ *       - in: path
+ *         name: teamId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del equipo (mi equipo)
+ *         example: 507f1f77bcf86cd799439014
+ *     responses:
+ *       200:
+ *         description: Detalles completos del partido
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 match:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     tournament:
+ *                       type: object
+ *                     round:
+ *                       type: integer
+ *                     roundName:
+ *                       type: string
+ *                     status:
+ *                       type: string
+ *                     scheduledTime:
+ *                       type: string
+ *                       format: date-time
+ *                     result:
+ *                       type: string
+ *                       enum: [won, lost, draw, null]
+ *                       nullable: true
+ *                     myTeam:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                         name:
+ *                           type: string
+ *                         score:
+ *                           type: integer
+ *                         players:
+ *                           type: array
+ *                           description: Lista completa de jugadores de mi equipo
+ *                         goals:
+ *                           type: array
+ *                           description: Goles anotados por mi equipo
+ *                         yellowCards:
+ *                           type: array
+ *                           description: Tarjetas amarillas de mi equipo
+ *                     rivalTeam:
+ *                       type: object
+ *                       properties:
+ *                         id:
+ *                           type: string
+ *                         name:
+ *                           type: string
+ *                         score:
+ *                           type: integer
+ *                         players:
+ *                           type: array
+ *                           description: Lista completa de jugadores del rival
+ *                         goals:
+ *                           type: array
+ *                           description: Goles anotados por el rival
+ *                         yellowCards:
+ *                           type: array
+ *                           description: Tarjetas amarillas del rival
+ *       400:
+ *         description: El equipo no participa en este partido
+ *       404:
+ *         description: Partido no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/:matchId/details/:teamId', MatchController.getMatchDetails);
 
 module.exports = router;

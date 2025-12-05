@@ -259,6 +259,7 @@ class BracketService {
     match.score2 = score2;
     match.winnerId = winnerId;
     match.completed = true;
+    match.status = 'finished';
     await match.save();
 
     // Propagar el ganador al siguiente match

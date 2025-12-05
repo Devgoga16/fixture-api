@@ -51,7 +51,68 @@ const matchSchema = new mongoose.Schema({
   scheduledTime: {
     type: Date,
     default: null
-  }
+  },
+  sport: {
+    type: Number,
+    enum: [1, 2],
+    required: true,
+    default: 1
+  },
+  sets: [{
+    set: {
+      type: Number,
+      required: true
+    },
+    score1: {
+      type: Number,
+      required: true
+    },
+    score2: {
+      type: Number,
+      required: true
+    },
+    status: {
+      type: String,
+      enum: ['in_progress', 'finished'],
+      default: 'in_progress'
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  goals: [{
+    playerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Player',
+      required: true
+    },
+    teamId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Team',
+      required: true
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  yellowCards: [{
+    playerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Player',
+      required: true
+    },
+    teamId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Team',
+      required: true
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
 }, {
   timestamps: true
 });
