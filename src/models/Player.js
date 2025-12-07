@@ -16,6 +16,10 @@ const playerSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true
+  },
+  camiseta: {
+    type: Number,
+    default: null
   }
 }, {
   timestamps: true

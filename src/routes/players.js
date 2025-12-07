@@ -108,6 +108,96 @@ router.get('/:teamId/players', PlayerController.getPlayersByTeam);
 
 /**
  * @swagger
+ * /api/teams/{teamId}/players/camisetas:
+ *   put:
+ *     summary: Actualizar números de camiseta de múltiples jugadores
+ *     tags: [Players]
+ *     description: Actualiza los números de camiseta de varios jugadores de un equipo en una sola operación
+ *     parameters:
+ *       - in: path
+ *         name: teamId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del equipo
+ *         example: 507f1f77bcf86cd799439012
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - players
+ *             properties:
+ *               players:
+ *                 type: array
+ *                 minItems: 1
+ *                 items:
+ *                   type: object
+ *                   required:
+ *                     - playerId
+ *                   properties:
+ *                     playerId:
+ *                       type: string
+ *                       description: ID del jugador
+ *                       example: 507f1f77bcf86cd799439013
+ *                     camiseta:
+ *                       type: number
+ *                       nullable: true
+ *                       description: Número de camiseta del jugador (debe ser un número positivo o null)
+ *                       example: 10
+ *     responses:
+ *       200:
+ *         description: Camisetas actualizadas exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "3 camisetas actualizadas"
+ *                 teamId:
+ *                   type: string
+ *                   example: 507f1f77bcf86cd799439012
+ *                 updated:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       playerId:
+ *                         type: string
+ *                       fullName:
+ *                         type: string
+ *                       camiseta:
+ *                         type: number
+ *                         nullable: true
+ *                       updated:
+ *                         type: boolean
+ *                 errors:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       playerId:
+ *                         type: string
+ *                       error:
+ *                         type: string
+ *       400:
+ *         description: Datos inválidos
+ *       404:
+ *         description: Equipo no encontrado
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.put('/:teamId/players/camisetas', PlayerController.updateCamisetas);
+
+/**
+ * @swagger
  * /api/teams/{teamId}/players/{playerId}:
  *   put:
  *     summary: Actualizar información de un jugador

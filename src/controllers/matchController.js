@@ -271,7 +271,8 @@ class MatchController {
               id: player._id,
               fullName: player.fullName,
               dni: player.dni,
-              createdAt: player.createdAt
+              createdAt: player.createdAt,
+              camiseta: player.camiseta
             })),
             playersCount: team1Players.length
           } : null,
@@ -287,7 +288,8 @@ class MatchController {
               id: player._id,
               fullName: player.fullName,
               dni: player.dni,
-              createdAt: player.createdAt
+              createdAt: player.createdAt,
+              camiseta: player.camiseta
             })),
             playersCount: team2Players.length
           } : null,

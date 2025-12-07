@@ -261,6 +261,94 @@ class PlayerController {
       res.status(500).json({ error: 'Error al consultar DNI' });
     }
   }
+
+  /**
+   * PUT /api/teams/:teamId/players/camisetas
+   * Actualizar números de camiseta de múltiples jugadores
+   */
+  static async updateCamisetas(req, res) {
+    try {
+      console.log('estamos aqui')
+      const { teamId } = req.params;
+      const { players } = req.body;
+
+      // Validaciones
+      if (!players || !Array.isArray(players) || players.length === 0) {
+        return res.status(400).json({
+          error: 'Se requiere un array de jugadores con sus números de camiseta'
+        });
+      }
+
+      // Verificar que el equipo existe
+      const team = await Team.findById(teamId);
+      if (!team) {
+        return res.status(404).json({ error: 'Equipo no encontrado' });
+      }
+
+      // Validar cada jugador
+      for (const player of players) {
+        if (!player.playerId) {
+          return res.status(400).json({
+            error: 'Cada elemento debe tener playerId'
+          });
+        }
+        if (player.camiseta !== null && player.camiseta !== undefined) {
+          if (typeof player.camiseta !== 'number' || player.camiseta < 0) {
+            return res.status(400).json({
+              error: 'El número de camiseta debe ser un número positivo o null'
+            });
+          }
+        }
+      }
+
+      // Actualizar cada jugador
+      const results = [];
+      const errors = [];
+
+      for (const playerData of players) {
+        try {
+          const player = await Player.findOne({ 
+            _id: playerData.playerId, 
+            teamId: teamId 
+          });
+
+          if (!player) {
+            errors.push({
+              playerId: playerData.playerId,
+              error: 'Jugador no encontrado o no pertenece a este equipo'
+            });
+            continue;
+          }
+
+          player.camiseta = playerData.camiseta !== undefined ? playerData.camiseta : player.camiseta;
+          await player.save();
+
+          results.push({
+            playerId: player._id,
+            fullName: player.fullName,
+            camiseta: player.camiseta,
+            updated: true
+          });
+        } catch (error) {
+          errors.push({
+            playerId: playerData.playerId,
+            error: error.message
+          });
+        }
+      }
+
+      res.json({
+        success: true,
+        message: `${results.length} camisetas actualizadas`,
+        teamId: teamId,
+        updated: results,
+        errors: errors.length > 0 ? errors : undefined
+      });
+    } catch (error) {
+      console.error('Error updating camisetas:', error);
+      res.status(500).json({ error: 'Error al actualizar números de camiseta' });
+    }
+  }
 }
 
 module.exports = PlayerController;
