@@ -10,10 +10,12 @@ class AuthController {
    */
   static async requestOTP(req, res) {
     try {
+      console.log('[requestOTP] Solicitud recibida:', { phone: req.body.phone, timestamp: new Date().toISOString() });
       const { phone } = req.body;
 
       // Validaciones
       if (!phone) {
+        console.log('[requestOTP] Error: teléfono no proporcionado');
         return res.status(400).json({
           error: 'Se requiere el número de teléfono'
         });
@@ -22,13 +24,17 @@ class AuthController {
       // Buscar superadmin por teléfono
       const superAdmin = await SuperAdmin.findOne({ phone });
       if (!superAdmin) {
+        console.log('[requestOTP] Error: superadmin no encontrado para', phone);
         return res.status(404).json({
           error: 'Número de teléfono no registrado'
         });
       }
 
+      console.log('[requestOTP] Superadmin encontrado:', superAdmin.name);
+
       // Verificar que WhatsApp esté conectado
       if (!whatsappService.isClientReady()) {
+        console.log('[requestOTP] Error: WhatsApp no conectado');
         return res.status(503).json({
           error: 'Servicio de WhatsApp no disponible',
           message: 'El administrador debe escanear el código QR primero'
@@ -46,28 +52,32 @@ class AuthController {
       superAdmin.otpExpiry = otpExpiry;
       await superAdmin.save();
 
-      // Enviar código por WhatsApp
-      const message = `🔐 *Fixture API - Código de Acceso*\n\nHola ${superAdmin.name},\n\nTu código de acceso es: *${otpCode}*\n\nEste código es válido por 5 minutos.\n\n⚠️ No compartas este código con nadie.`;
+      console.log('[requestOTP] OTP generado y guardado:', otpCode);
 
-      try {
-        // Agregar prefijo 51 si no lo tiene
-        const phoneWithCountryCode = phone.startsWith('51') ? phone : `51${phone}`;
-        await whatsappService.sendMessage(phoneWithCountryCode, message);
-        
-        res.json({
-          success: true,
-          message: 'Código OTP enviado por WhatsApp',
-          expiresIn: '5 minutos'
+      // Responder inmediatamente al cliente
+      res.json({
+        success: true,
+        message: 'Código OTP generado. Se está enviando por WhatsApp...',
+        expiresIn: '5 minutos'
+      });
+
+      // Enviar código por WhatsApp en background
+      const message = `🔐 *Fixture API - Código de Acceso*\n\nHola ${superAdmin.name},\n\nTu código de acceso es: *${otpCode}*\n\nEste código es válido por 5 minutos.\n\n⚠️ No compartas este código con nadie.`;
+      const phoneWithCountryCode = phone.startsWith('51') ? phone : `51${phone}`;
+      
+      console.log('[requestOTP] Enviando mensaje a:', phoneWithCountryCode);
+      
+      // Enviar en background sin bloquear la respuesta
+      whatsappService.sendMessage(phoneWithCountryCode, message)
+        .then(() => {
+          console.log('[requestOTP] ✅ Mensaje enviado exitosamente a', phoneWithCountryCode);
+        })
+        .catch((error) => {
+          console.error('[requestOTP] ❌ Error enviando WhatsApp:', error);
         });
-      } catch (error) {
-        console.error('Error enviando WhatsApp:', error);
-        res.status(500).json({
-          error: 'Error al enviar código por WhatsApp',
-          message: error.message
-        });
-      }
+
     } catch (error) {
-      console.error('Error requesting OTP:', error);
+      console.error('[requestOTP] Error general:', error);
       res.status(500).json({ error: 'Error al solicitar código OTP' });
     }
   }
@@ -187,10 +197,12 @@ class AuthController {
    */
   static async requestOTPDelegado(req, res) {
     try {
+      console.log('[requestOTPDelegado] Solicitud recibida:', { phone: req.body.phone, timestamp: new Date().toISOString() });
       const { phone } = req.body;
 
       // Validaciones
       if (!phone) {
+        console.log('[requestOTPDelegado] Error: teléfono no proporcionado');
         return res.status(400).json({
           error: 'Se requiere el número de teléfono'
         });
@@ -199,13 +211,17 @@ class AuthController {
       // Buscar delegado por teléfono
       const team = await Team.findOne({ delegadoTelefono: phone }).populate('tournamentId', 'name');
       if (!team) {
+        console.log('[requestOTPDelegado] Error: delegado no encontrado para', phone);
         return res.status(404).json({
           error: 'Número de teléfono no registrado como delegado'
         });
       }
 
+      console.log('[requestOTPDelegado] Delegado encontrado:', team.name);
+
       // Verificar que WhatsApp esté conectado
       if (!whatsappService.isClientReady()) {
+        console.log('[requestOTPDelegado] Error: WhatsApp no conectado');
         return res.status(503).json({
           error: 'Servicio de WhatsApp no disponible',
           message: 'El administrador debe escanear el código QR primero'
@@ -223,29 +239,33 @@ class AuthController {
       team.otpExpiry = otpExpiry;
       await team.save();
 
-      // Enviar código por WhatsApp
-      const message = `🔐 *Fixture API - Código de Acceso*\n\nHola ${team.delegadoNombre || 'Delegado'},\n\nTu código de acceso para el equipo *${team.name}* es: *${otpCode}*\n\nTorneo: ${team.tournamentId.name}\n\nEste código es válido por 5 minutos.\n\n⚠️ No compartas este código con nadie.`;
+      console.log('[requestOTPDelegado] OTP generado y guardado:', otpCode);
 
-      try {
-        // Agregar prefijo 51 si no lo tiene
-        const phoneWithCountryCode = phone.startsWith('51') ? phone : `51${phone}`;
-        await whatsappService.sendMessage(phoneWithCountryCode, message);
-        
-        res.json({
-          success: true,
-          message: 'Código OTP enviado por WhatsApp',
-          expiresIn: '5 minutos',
-          teamName: team.name
+      // Responder inmediatamente al cliente
+      res.json({
+        success: true,
+        message: 'Código OTP generado. Se está enviando por WhatsApp...',
+        expiresIn: '5 minutos',
+        teamName: team.name
+      });
+
+      // Enviar código por WhatsApp en background
+      const message = `🔐 *Fixture API - Código de Acceso*\n\nHola ${team.delegadoNombre || 'Delegado'},\n\nTu código de acceso para el equipo *${team.name}* es: *${otpCode}*\n\nTorneo: ${team.tournamentId.name}\n\nEste código es válido por 5 minutos.\n\n⚠️ No compartas este código con nadie.`;
+      const phoneWithCountryCode = phone.startsWith('51') ? phone : `51${phone}`;
+      
+      console.log('[requestOTPDelegado] Enviando mensaje a:', phoneWithCountryCode);
+      
+      // Enviar en background sin bloquear la respuesta
+      whatsappService.sendMessage(phoneWithCountryCode, message)
+        .then(() => {
+          console.log('[requestOTPDelegado] ✅ Mensaje enviado exitosamente a', phoneWithCountryCode);
+        })
+        .catch((error) => {
+          console.error('[requestOTPDelegado] ❌ Error enviando WhatsApp:', error);
         });
-      } catch (error) {
-        console.error('Error enviando WhatsApp:', error);
-        res.status(500).json({
-          error: 'Error al enviar código por WhatsApp',
-          message: error.message
-        });
-      }
+
     } catch (error) {
-      console.error('Error requesting OTP for delegado:', error);
+      console.error('[requestOTPDelegado] Error general:', error);
       res.status(500).json({ error: 'Error al solicitar código OTP' });
     }
   }
@@ -343,10 +363,12 @@ class AuthController {
    */
   static async sendWelcomeMessage(req, res) {
     try {
+      console.log('[sendWelcomeMessage] Solicitud recibida:', { phone: req.body.phone, timestamp: new Date().toISOString() });
       const { phone } = req.body;
 
       // Validaciones
       if (!phone) {
+        console.log('[sendWelcomeMessage] Error: teléfono no proporcionado');
         return res.status(400).json({
           error: 'Se requiere el número de teléfono'
         });
@@ -354,6 +376,7 @@ class AuthController {
 
       // Verificar que WhatsApp esté conectado
       if (!whatsappService.isClientReady()) {
+        console.log('[sendWelcomeMessage] Error: WhatsApp no conectado');
         return res.status(503).json({
           error: 'Servicio de WhatsApp no disponible',
           message: 'El administrador debe escanear el código QR primero'
@@ -365,10 +388,25 @@ class AuthController {
         .populate('tournamentId', 'name');
 
       if (!team) {
+        console.log('[sendWelcomeMessage] Error: delegado no encontrado para', phone);
         return res.status(404).json({
           error: 'Delegado no encontrado con ese número de teléfono'
         });
       }
+
+      console.log('[sendWelcomeMessage] Delegado encontrado:', team.name);
+
+      // Responder inmediatamente al cliente
+      res.json({
+        success: true,
+        message: 'Mensaje de bienvenida enviándose...',
+        sentTo: {
+          phone: phone,
+          name: team.delegadoNombre,
+          team: team.name,
+          tournament: team.tournamentId.name
+        }
+      });
 
       // Crear mensaje de bienvenida
       const welcomeMessage = `🎉 *¡Bienvenido al Torneo UNIDOS EN CRISTO!*\n\n` +
@@ -400,22 +438,20 @@ class AuthController {
         `¡Mucha suerte en el torneo! 🏆\n\n` +
         `_Si tienes alguna duda, contacta al administrador del torneo._`;
 
-      // Enviar mensaje con prefijo 51 si no lo tiene
+      // Enviar mensaje en background
       const phoneWithCountryCode = phone.startsWith('51') ? phone : `51${phone}`;
-      await whatsappService.sendMessage(phoneWithCountryCode, welcomeMessage);
+      console.log('[sendWelcomeMessage] Enviando mensaje a:', phoneWithCountryCode);
+      
+      whatsappService.sendMessage(phoneWithCountryCode, welcomeMessage)
+        .then(() => {
+          console.log('[sendWelcomeMessage] ✅ Mensaje de bienvenida enviado exitosamente a', phoneWithCountryCode);
+        })
+        .catch((error) => {
+          console.error('[sendWelcomeMessage] ❌ Error enviando mensaje de bienvenida:', error);
+        });
 
-      res.json({
-        success: true,
-        message: 'Mensaje de bienvenida enviado exitosamente',
-        sentTo: {
-          phone: phone,
-          name: team.delegadoNombre,
-          team: team.name,
-          tournament: team.tournamentId.name
-        }
-      });
     } catch (error) {
-      console.error('Error sending welcome message:', error);
+      console.error('[sendWelcomeMessage] Error general:', error);
       res.status(500).json({ error: 'Error al enviar mensaje de bienvenida' });
     }
   }
